@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Mess System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Navigation -->
+    <div class="bg-white shadow p-4 flex justify-center space-x-4">
+        <button onclick="loadPage('login.html')" class="px-4 py-2 bg-blue-500 text-white rounded">Login</button>
+        <button onclick="loadPage('dashboard.html')" class="px-4 py-2 bg-green-500 text-white rounded">Dashboard</button>
+        <button onclick="loadPage('scan.html')" class="px-4 py-2 bg-red-500 text-white rounded">Scan</button>
+        <button onclick="loadPage('history.html')" class="px-4 py-2 bg-purple-500 text-white rounded">History</button>
+        <button onclick="loadPage('profile.html')" class="px-4 py-2 bg-orange-500 text-white rounded">Profile</button>
+    </div>
+
+    <!-- IFRAME Container -->
+    <iframe id="contentFrame"
+            class="w-full h-screen border-none"
+            src="login.html">
+    </iframe>
+
+<script>
+function loadPage(page) {
+    document.getElementById("contentFrame").src = page;
+}
+</script>
+
+</body>
+</html>

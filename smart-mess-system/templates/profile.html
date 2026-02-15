@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Profile - Smart Mess System</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Manrope', sans-serif; background: #F6F9F6; }
+.glassmorphism {
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(12px);
+}
+</style>
+</head>
+
+<body class="min-h-screen">
+
+<header class="glassmorphism shadow-lg p-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold">My Profile</h1>
+    <button onclick="goBack()" class="text-green-600 font-semibold">
+        ← Back to Dashboard
+    </button>
+</header>
+
+<main class="max-w-4xl mx-auto p-6">
+
+<div class="glassmorphism rounded-2xl p-8 shadow-lg">
+
+<div class="flex items-center space-x-6 mb-8">
+<div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl font-bold"
+id="avatarInitial">
+S
+</div>
+<div>
+<h2 class="text-2xl font-bold" id="studentName">Student</h2>
+<p class="text-gray-600">Student ID: <span id="studentIdDisplay"></span></p>
+</div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+<div>
+<label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+<input id="nameInput" type="text" disabled
+class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-100">
+</div>
+
+<div>
+<label class="block text-sm font-semibold text-gray-700 mb-2">Year</label>
+<input id="yearInput" type="text" disabled
+class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-100">
+</div>
+
+<div>
+<label class="block text-sm font-semibold text-gray-700 mb-2">Hostel</label>
+<input id="hostelInput" type="text" disabled
+class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-100">
+</div>
+
+<div>
+<label class="block text-sm font-semibold text-gray-700 mb-2">Account Status</label>
+<input type="text" value="Active" disabled
+class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-100">
+</div>
+
+</div>
+
+<div class="mt-6 text-sm text-gray-600">
+Profile editing not enabled in demo version.
+</div>
+
+</div>
+
+</main>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+    const studentId = localStorage.getItem("student_id");
+
+    // If not logged in → go back to login
+    if (!studentId) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/auth/student/${studentId}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error("Failed to load profile");
+        }
+
+        // Update UI
+        document.getElementById("studentName").innerText = data.name;
+        document.getElementById("studentIdDisplay").innerText = data.id;
+        document.getElementById("nameInput").value = data.name;
+        document.getElementById("yearInput").value = data.year;
+        document.getElementById("hostelInput").value = data.hostel;
+
+        // Avatar initials
+        document.getElementById("avatarInitial").innerText =
+            data.name.charAt(0).toUpperCase();
+
+    } catch (error) {
+        console.error(error);
+    }
+
+});
+
+// Back button
+function goBack() {
+    window.location.href = "dashboard.html";
+}
+</script>
+
+
+</body>
+</html>

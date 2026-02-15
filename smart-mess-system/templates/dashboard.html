@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Smart Mess System</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Manrope', sans-serif; background: #F6F9F6; }
+.glassmorphism {
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(12px);
+}
+.card-hover { transition: transform 0.3s ease; }
+.card-hover:hover { transform: translateY(-6px); }
+</style>
+</head>
+
+<body class="min-h-screen">
+
+<header class="glassmorphism shadow-lg p-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold">Smart Mess Dashboard</h1>
+    <div class="flex items-center space-x-4">
+        <span id="studentName" class="font-semibold"></span>
+        <button onclick="logout()" class="bg-red-500 text-white px-3 py-2 rounded-lg">Logout</button>
+    </div>
+</header>
+
+<main class="max-w-6xl mx-auto p-6">
+
+<!-- Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+<div class="card-hover bg-white rounded-xl p-6 shadow">
+<p class="text-gray-600 text-sm">Total Meals Taken</p>
+<p class="text-4xl font-bold text-green-600" id="totalMeals">0</p>
+</div>
+
+<div class="card-hover bg-white rounded-xl p-6 shadow">
+<p class="text-gray-600 text-sm">Breakfast Count</p>
+<p class="text-4xl font-bold text-yellow-600" id="breakfastCount">0</p>
+</div>
+
+<div class="card-hover bg-white rounded-xl p-6 shadow">
+<p class="text-gray-600 text-sm">Lunch + Dinner</p>
+<p class="text-4xl font-bold text-blue-600" id="otherMeals">0</p>
+</div>
+
+</div>
+
+<!-- Quick Actions -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+
+<div class="glassmorphism rounded-xl p-6 shadow">
+<h2 class="text-lg font-bold mb-4">Pre-Book Meal</h2>
+<button onclick="goToPrebook()"
+class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition">
+Book Current Meal
+</button>
+</div>
+
+<div class="glassmorphism rounded-xl p-6 shadow">
+<h2 class="text-lg font-bold mb-4">Take Meal</h2>
+<button onclick="goToScan()"
+class="w-full bg-teal-600 text-white py-3 rounded-lg hover:bg-teal-700 transition">
+Scan QR
+</button>
+</div>
+
+</div>
+
+<!-- Mess Live Counts -->
+<div class="glassmorphism rounded-xl p-6 shadow">
+<h2 class="text-lg font-bold mb-4">Current Mess Occupancy</h2>
+<div id="messCounts" class="space-y-3"></div>
+</div>
+
+</main>
+
+<script>
+
+// Redirect if not logged in
+const studentId = localStorage.getItem("student_id");
+if (!studentId) {
+    window.location.href = "login.html";
+}
+
+// Set student name
+document.getElementById("studentName").innerText =
+    localStorage.getItem("student_name") || "Student";
+
+// Logout
+function logout() {
+    localStorage.clear();
+    window.location.href = "login.html";
+}
+
+// Navigation
+function goToPrebook() {
+    window.location.href = "prebook.html";
+}
+function goToScan() {
+    window.location.href = "scan.html";
+}
+
+// Fetch student summary
+async function loadStudentSummary() {
+    try {
+        const response = await fetch(
+            `http://127.0.0.1:8000/dashboard/student-summary/${studentId}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error("Failed to load summary");
+        }
+
+        document.getElementById("totalMeals").innerText = data.total_meals;
+        document.getElementById("breakfastCount").innerText = data.breakfast_count;
+        document.getElementById("otherMeals").innerText =
+            data.lunch_count + data.dinner_count;
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// Fetch mess live counts
+async function loadMessCounts() {
+    try {
+        const response = await fetch(
+            "http://127.0.0.1:8000/dashboard/mess-counts"
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error("Failed to load mess counts");
+        }
+
+        const container = document.getElementById("messCounts");
+        container.innerHTML = "";
+
+        data.forEach(mess => {
+            const div = document.createElement("div");
+            div.className = "bg-white p-4 rounded-lg shadow flex justify-between";
+            div.innerHTML = `
+                <div>
+                    <p class="font-semibold">${mess.mess_name}</p>
+                    <p class="text-sm text-gray-600">
+                        Booked: ${mess.booked} | Attended: ${mess.attended}
+                    </p>
+                </div>
+                <div class="text-green-600 font-bold">
+                    Remaining: ${mess.remaining_capacity}
+                </div>
+            `;
+            container.appendChild(div);
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// Load data on page load
+loadStudentSummary();
+loadMessCounts();
+
+</script>
+
+</body>
+</html>
